@@ -23,7 +23,6 @@ jobs:
       - name: Checkout PR Code
         uses: actions/checkout@v4
         with:
-          # PR'ın kodunu checkout et (fork dahil)
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
@@ -35,14 +34,12 @@ jobs:
       - name: Find Changed Files
         id: changed-files
         run: |
-          # Base ve head SHA'ları kullanarak değişen dosyaları bul
           BASE_SHA=${{ github.event.pull_request.base.sha }}
           HEAD_SHA=${{ github.event.pull_request.head.sha }}
           
           echo "Base SHA: $BASE_SHA"
           echo "Head SHA: $HEAD_SHA"
           
-          # Değişen .cs dosyalarını bul
           CHANGED_FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA -- 'homeworks/csharp-fundamentals/**/submissions/*.cs' 2>/dev/null || echo "")
           
           if [ -z "$CHANGED_FILES" ]; then
@@ -73,11 +70,10 @@ jobs:
             filename=$(basename "$file")
             echo "Kontrol ediliyor: $filename"
             
-            # Check format: ProblemX_123456789.cs
             if [[ ! $filename =~ ^Problem[1-4]_[0-9]{9}\.cs$ ]]; then
               echo "❌ HATA: $filename formatı yanlış!"
               echo "   Beklenen: ProblemX_OGRENCI_NO.cs (9 haneli numara)"
-              INVALID_FILES="${INVALID_FILES}- \`${filename}\`\n"
+              INVALID_FILES="${INVALID_FILES}${filename}, "
               VALID=false
             else
               echo "✅ Format doğru: $filename"
@@ -92,9 +88,9 @@ jobs:
           if [ "$VALID" = false ]; then
             echo ""
             echo "⚠️ Bazı dosya adları yanlış formatta!"
-            echo "invalid_files<<EOF" >> $GITHUB_OUTPUT
-            echo -e "$INVALID_FILES" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
+            # Remove trailing comma and space
+            INVALID_FILES="${INVALID_FILES%, }"
+            echo "invalid_files=$INVALID_FILES" >> $GITHUB_OUTPUT
             echo "valid=false" >> $GITHUB_OUTPUT
           else
             echo ""
@@ -111,13 +107,19 @@ jobs:
           
           ALL_PASSED=true
           TOTAL_SCORE=0
-          RESULTS_TABLE="| Problem | Dosya | Puan | Durum |\n|---------|-------|------|-------|\n"
-          FAILED_DETAILS=""
+          
+          # Create comment body file
+          echo "## 📊 C# Ödev Test Sonuçları" > /tmp/comment_body.md
+          echo "" >> /tmp/comment_body.md
+          echo "| Problem | Puan | Durum |" >> /tmp/comment_body.md
+          echo "|---------|------|-------|" >> /tmp/comment_body.md
+          
+          # Failed tests file
+          echo "" > /tmp/failed_tests.md
           
           while IFS= read -r file; do
             [ -z "$file" ] && continue
             
-            # Problem numarasını dosya yolundan çıkar
             if [[ "$file" =~ problem-([1-4])/submissions/ ]]; then
               problem_num="${BASH_REMATCH[1]}"
               PROBLEM_DIR="homeworks/csharp-fundamentals/problem-${problem_num}"
@@ -128,7 +130,6 @@ jobs:
               echo "║  Problem $problem_num - $filename"
               echo "╚══════════════════════════════════════════════════╝"
               
-              # Create temp project
               TEMP_DIR=$(mktemp -d)
               cp "$file" "$TEMP_DIR/Problem${problem_num}.cs"
               cp "$PROBLEM_DIR/Problem${problem_num}.Tests.cs" "$TEMP_DIR/"
@@ -136,7 +137,6 @@ jobs:
               cd "$TEMP_DIR"
               dotnet new console -n TestProject -o . --force > /dev/null 2>&1
               
-              # Run tests and capture output
               set +e
               TEST_OUTPUT=$(dotnet run -- "$filename" 2>&1)
               TEST_EXIT_CODE=$?
@@ -144,26 +144,27 @@ jobs:
               
               echo "$TEST_OUTPUT"
               
-              # Parse score from output
               SCORE=$(echo "$TEST_OUTPUT" | grep -oP 'TOPLAM PUAN\s*│\s*\K[\d.]+' | head -1 || echo "0")
               [ -z "$SCORE" ] && SCORE="0"
               
-              # Determine status
               if [ "$TEST_EXIT_CODE" -eq 0 ]; then
                 STATUS="✅ Geçti"
               else
                 STATUS="❌ Kaldı"
                 ALL_PASSED=false
                 
-                # Extract failed tests for details
+                # Add failed tests to file
                 FAILS=$(echo "$TEST_OUTPUT" | grep "❌" | head -5 || true)
                 if [ -n "$FAILS" ]; then
-                  FAILED_DETAILS="${FAILED_DETAILS}\n**Problem ${problem_num} - Başarısız Testler:**\n\`\`\`\n${FAILS}\n\`\`\`\n"
+                  echo "### Problem ${problem_num} - Hatalar" >> /tmp/failed_tests.md
+                  echo '```' >> /tmp/failed_tests.md
+                  echo "$FAILS" >> /tmp/failed_tests.md
+                  echo '```' >> /tmp/failed_tests.md
+                  echo "" >> /tmp/failed_tests.md
                 fi
               fi
               
-              # Add to results table
-              RESULTS_TABLE="${RESULTS_TABLE}| Problem ${problem_num} | \`${filename}\` | ${SCORE}/25 | ${STATUS} |\n"
+              echo "| Problem ${problem_num} | ${SCORE}/25 | ${STATUS} |" >> /tmp/comment_body.md
               
               TOTAL_SCORE=$(echo "$TOTAL_SCORE + $SCORE" | bc)
               
@@ -172,25 +173,34 @@ jobs:
             fi
           done <<< "${{ steps.validate-files.outputs.valid_files }}"
           
+          echo "" >> /tmp/comment_body.md
+          echo "**Toplam Puan:** $TOTAL_SCORE / 100" >> /tmp/comment_body.md
+          echo "" >> /tmp/comment_body.md
+          
+          if [ "$ALL_PASSED" = true ]; then
+            echo "---" >> /tmp/comment_body.md
+            echo "🎉 **Tebrikler!** Tüm testler geçti. PR merge edilebilir." >> /tmp/comment_body.md
+          else
+            # Add failed tests details
+            if [ -s /tmp/failed_tests.md ]; then
+              echo "---" >> /tmp/comment_body.md
+              cat /tmp/failed_tests.md >> /tmp/comment_body.md
+            fi
+            echo "---" >> /tmp/comment_body.md
+            echo "❌ **PR merge edilemez.** Tüm testlerin geçmesi gerekiyor." >> /tmp/comment_body.md
+          fi
+          
+          echo "" >> /tmp/comment_body.md
+          echo "---" >> /tmp/comment_body.md
+          echo "*GitHub Workshop Bot* 🤖" >> /tmp/comment_body.md
+          
           echo ""
           echo "═══════════════════════════════════════════════════"
           echo "📊 TOPLAM SONUÇ: $TOTAL_SCORE / 100 puan"
           echo "═══════════════════════════════════════════════════"
           
-          # Set outputs
           echo "total_score=$TOTAL_SCORE" >> $GITHUB_OUTPUT
           echo "all_passed=$ALL_PASSED" >> $GITHUB_OUTPUT
-          
-          # Save results for comment
-          echo "results_table<<EOF" >> $GITHUB_OUTPUT
-          echo -e "$RESULTS_TABLE" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-          
-          echo "failed_details<<EOF" >> $GITHUB_OUTPUT
-          echo -e "$FAILED_DETAILS" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-          
-          # Don't exit with error here - let the comment step run first
 
       - name: Generate Job Summary
         if: always() && steps.changed-files.outputs.any_changed == 'true'
@@ -201,64 +211,38 @@ jobs:
           if [ "${{ steps.validate-files.outputs.valid }}" = "false" ]; then
             echo "### ❌ Dosya Adı Hatası" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Aşağıdaki dosyaların adları yanlış formatta:" >> $GITHUB_STEP_SUMMARY
+            echo "Yanlış format: ${{ steps.validate-files.outputs.invalid_files }}" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "${{ steps.validate-files.outputs.invalid_files }}" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**Beklenen format:** \`ProblemX_OGRENCI_NO.cs\` (9 haneli numara)" >> $GITHUB_STEP_SUMMARY
-          elif [ "${{ steps.run-tests.outputs.all_passed }}" = "true" ]; then
-            echo "### ✅ Tüm Testler Başarılı!" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "${{ steps.run-tests.outputs.results_table }}" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**Toplam Puan:** ${{ steps.run-tests.outputs.total_score }} / 100" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "🎉 Tebrikler!" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "### ⚠️ Bazı Testler Başarısız" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "${{ steps.run-tests.outputs.results_table }}" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**Toplam Puan:** ${{ steps.run-tests.outputs.total_score }} / 100" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "${{ steps.run-tests.outputs.failed_details }}" >> $GITHUB_STEP_SUMMARY
+            echo "**Beklenen format:** ProblemX_OGRENCI_NO.cs (9 haneli numara)" >> $GITHUB_STEP_SUMMARY
+          elif [ -f /tmp/comment_body.md ]; then
+            cat /tmp/comment_body.md >> $GITHUB_STEP_SUMMARY
           fi
           
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "---" >> $GITHUB_STEP_SUMMARY
           echo "📚 [GitHub Workshop Wiki](https://github.com/Furk4nBulut/Github-Workshop/wiki)" >> $GITHUB_STEP_SUMMARY
 
-      - name: ✅ Başarılı - PR'a Yorum Ekle
+      - name: Post PR Comment - Success
         if: always() && steps.changed-files.outputs.any_changed == 'true' && steps.validate-files.outputs.valid == 'true' && steps.run-tests.outputs.all_passed == 'true'
         uses: actions/github-script@v7
         with:
           script: |
-            const score = '${{ steps.run-tests.outputs.total_score }}';
-            const table = `${{ steps.run-tests.outputs.results_table }}`;
+            const fs = require('fs');
+            const commentBody = fs.readFileSync('/tmp/comment_body.md', 'utf8');
             
             await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `## ✅ C# Ödev Testleri Başarılı!
-
-            ${table}
-
-            **Toplam Puan:** ${score} / 100
-
-            ---
-            🎉 **Tebrikler!** Tüm testler geçti. PR merge edilebilir.
-
-            ---
-            *GitHub Workshop Bot* 🤖`
+              body: commentBody
             });
 
-      - name: ❌ Dosya Formatı Hatası - PR'a Yorum Ekle
+      - name: Post PR Comment - File Name Error
         if: always() && steps.changed-files.outputs.any_changed == 'true' && steps.validate-files.outputs.valid == 'false'
         uses: actions/github-script@v7
         with:
           script: |
-            const invalidFiles = `${{ steps.validate-files.outputs.invalid_files }}`;
+            const invalidFiles = process.env.INVALID_FILES;
             
             await github.rest.issues.createComment({
               issue_number: context.issue.number,
@@ -266,9 +250,7 @@ jobs:
               repo: context.repo.repo,
               body: `## ❌ Dosya Adı Hatası
 
-            Aşağıdaki dosyaların adları yanlış formatta:
-
-            ${invalidFiles}
+            Yanlış formatta dosyalar: **${invalidFiles}**
 
             ### 📋 Doğru Format
             \`ProblemX_OGRENCI_NO.cs\` (9 haneli öğrenci numarası)
@@ -281,44 +263,22 @@ jobs:
             ---
             *GitHub Workshop Bot* 🤖`
             });
+        env:
+          INVALID_FILES: ${{ steps.validate-files.outputs.invalid_files }}
 
-      - name: ⚠️ Test Başarısız - PR'a Yorum Ekle
+      - name: Post PR Comment - Test Failed
         if: always() && steps.changed-files.outputs.any_changed == 'true' && steps.validate-files.outputs.valid == 'true' && steps.run-tests.outputs.all_passed == 'false'
         uses: actions/github-script@v7
         with:
           script: |
-            const score = '${{ steps.run-tests.outputs.total_score }}' || '0';
-            const table = `${{ steps.run-tests.outputs.results_table }}`;
-            const failedDetails = `${{ steps.run-tests.outputs.failed_details }}`;
+            const fs = require('fs');
+            const commentBody = fs.readFileSync('/tmp/comment_body.md', 'utf8');
             
             await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `## ⚠️ C# Ödev Testleri Başarısız
-
-            ${table}
-
-            **Toplam Puan:** ${score} / 100
-
-            ---
-
-            ### ❌ Başarısız Test Detayları
-            ${failedDetails}
-
-            ---
-
-            ### 💡 Öneriler
-            - Hata mesajlarını dikkatlice okuyun
-            - Fonksiyon isimlerinin doğru olduğundan emin olun
-            - Dönüş tiplerini kontrol edin
-            - README dosyasını tekrar okuyun
-
-            ---
-            ❌ **PR merge edilemez.** Tüm testlerin geçmesi gerekiyor.
-
-            ---
-            *GitHub Workshop Bot* 🤖`
+              body: commentBody
             });
 
       - name: Final Status Check
