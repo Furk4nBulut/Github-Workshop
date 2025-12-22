@@ -1,41 +1,51 @@
-## 📋 PR Türü Seçin
+## 📚 C# Ödev Teslimi
 
-Bu PR hangi kategoriye giriyor?
+### 📋 Öğrenci Bilgileri
 
-### 🎓 Ödev Teslimi mi?
-
-Eğer **C# programlama ödevi** teslim ediyorsanız, lütfen bu PR'ı kapatın ve aşağıdaki linki kullanın:
-
-👉 **[Ödev PR'ı Aç](../../compare/main...main?template=homework.md&expand=1)**
+| Bilgi | Değer |
+|-------|-------|
+| **Öğrenci No** | |
+| **Ad Soyad** | |
+| **E-posta** | @ogr.cbu.edu.tr |
 
 ---
 
-### 📝 Genel Katkı için devam edin:
+### 📝 Teslim Edilen Problemler
 
-## 🔧 Değişiklik Türü
+- [ ] Problem 1: Öğrenci Not Hesaplama (if-else)
+- [ ] Problem 2: Gün ve Ay Hesaplama (switch-case)
+- [ ] Problem 3: Döngüler ve Matematik (for, while)
+- [ ] Problem 4: Dizi ve Liste İşlemleri (foreach)
 
-- [ ] 🐛 Bug fix
-- [ ] ✨ Yeni özellik
-- [ ] 💥 Breaking change
-- [ ] 📚 Dokümantasyon
-- [ ] ♻️ Refactoring
-- [ ] 🧪 Test
+---
 
-## 📝 Açıklama
+### ✅ Akademik Dürüstlük Beyanı
 
-Bu PR ile ne yaptığınızı açıklayın.
+> ⚠️ Aşağıdaki maddeleri onaylamadan PR'ınız kabul edilmeyecektir.
 
-## 📝 Yapılan Değişiklikler
+- [ ] 📝 Bu ödevi **kendim yaptım**, kopya çekmedim.
+- [ ] 🔍 Kodlarımı **test ettim** ve çalıştığını onaylıyorum.
+- [ ] 📖 README dosyalarını **okudum** ve talimatları takip ettim.
+- [ ] 📁 Dosya adı formatına uydum: `ProblemX_OGRENCI_NO.cs`
+- [ ] ❌ Başkasının dosyasını **değiştirmedim**.
+- [ ] ⚠️ Test dosyalarını **değiştirmedim**.
 
-- Değişiklik 1
-- Değişiklik 2
+---
 
-## ✅ Kontrol Listesi
+### 🧪 Test Sonuçları
 
-- [ ] Kodumu self-review yaptım
-- [ ] Gerekli yerlere yorum ekledim
-- [ ] Değişikliklerim yeni uyarı oluşturmuyor
+Kodlarınızı yerel olarak test ettiniz mi?
 
-## 🔗 İlgili Issue
+- [ ] Evet, tüm testler geçti
+- [ ] Evet, bazı testler geçti  
+- [ ] Hayır, test edemedim
 
-Closes #
+```
+Test çıktınızı buraya yapıştırın (isteğe bağlı)
+```
+
+---
+
+### 💬 Notlar (İsteğe Bağlı)
+
+Eklemek istediğiniz notlar.

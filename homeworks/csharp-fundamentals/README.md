@@ -81,21 +81,17 @@ git push origin homework/OGRENCI_NO
 
 ### Adım 5: Pull Request Açın
 
-1. Aşağıdaki linke tıklayarak PR açın:
-
-   👉 **[PR Aç (Ödev Şablonu)](https://github.com/Furk4nBulut/Github-Workshop/compare/main...KULLANICI_ADINIZ:Github-Workshop:homework/OGRENCI_NO?template=homework.md&expand=1)**
-
-   > ⚠️ Linkteki `KULLANICI_ADINIZ` ve `OGRENCI_NO` kısımlarını kendi bilgilerinizle değiştirin!
-
-2. Açılan formda:
+1. GitHub'da **fork'unuza** gidin
+2. **"Compare & pull request"** butonuna tıklayın
+3. Açılan formda:
    - Öğrenci bilgilerinizi doldurun
    - Teslim ettiğiniz problemleri işaretleyin
    - **Akademik dürüstlük beyanını** onaylayın
+4. **"Create pull request"** tıklayın
 
 > [!IMPORTANT]
 > PR açtığınızda **akademik dürüstlük beyanını** onaylamanız gerekiyor!
 > 
-> Beyan içeriği:
 > - ✅ Bu ödevi kendim yaptım, kopya çekmedim
 > - ✅ Kodlarımı test ettim ve çalıştığını onaylıyorum
 > - ✅ Dosya adı formatına uydum
