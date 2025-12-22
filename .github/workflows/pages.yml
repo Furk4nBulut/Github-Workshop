@@ -1,6 +1,4 @@
-# Deploy to GitHub Pages
-
-name: Deploy to GitHub Pages
+name: Build Stats & Deploy Pages
 
 on:
   push:
@@ -17,13 +15,202 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  build-stats:
     runs-on: ubuntu-latest
     
     steps:
       - name: 📥 Checkout
         uses: actions/checkout@v4
-      
+
+      - name: 🔧 Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: 📊 Generate Statistics
+        run: |
+          echo "📊 Generating statistics from submissions..."
+          
+          SCORES_FILE="docs/data/scores.json"
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          
+          # Initialize data structures
+          declare -A STUDENTS
+          
+          # Statistics counters
+          TOTAL_STUDENTS=0
+          TOTAL_SUBMISSIONS=0
+          HIGHEST_SCORE=0
+          
+          # Problem stats
+          P1_ATTEMPTS=0
+          P1_TOTAL=0
+          P1_PASS=0
+          P2_ATTEMPTS=0
+          P2_TOTAL=0
+          P2_PASS=0
+          P3_ATTEMPTS=0
+          P3_TOTAL=0
+          P3_PASS=0
+          P4_ATTEMPTS=0
+          P4_TOTAL=0
+          P4_PASS=0
+          
+          # Scan all submissions
+          for problem_num in 1 2 3 4; do
+            SUBMISSIONS_DIR="homeworks/csharp-fundamentals/problem-${problem_num}/submissions"
+            
+            if [ -d "$SUBMISSIONS_DIR" ]; then
+              for file in "$SUBMISSIONS_DIR"/Problem${problem_num}_*.cs; do
+                if [ -f "$file" ]; then
+                  filename=$(basename "$file")
+                  
+                  # Extract student number
+                  if [[ "$filename" =~ Problem[1-4]_([0-9]{9})\.cs ]]; then
+                    STUDENT_NO="${BASH_REMATCH[1]}"
+                    
+                    echo "Found: $filename (Student: $STUDENT_NO)"
+                    
+                    # Run test for this submission
+                    PROBLEM_DIR="homeworks/csharp-fundamentals/problem-${problem_num}"
+                    TEMP_DIR=$(mktemp -d)
+                    
+                    cp "$file" "$TEMP_DIR/Problem${problem_num}.cs"
+                    cp "$PROBLEM_DIR/Problem${problem_num}.Tests.cs" "$TEMP_DIR/"
+                    
+                    cd "$TEMP_DIR"
+                    dotnet new console -n TestProject -o . --force > /dev/null 2>&1
+                    
+                    set +e
+                    TEST_OUTPUT=$(dotnet run -- "$filename" 2>&1)
+                    TEST_EXIT_CODE=$?
+                    set -e
+                    
+                    # Extract score
+                    SCORE=$(echo "$TEST_OUTPUT" | grep -oP 'TOPLAM PUAN\s*│\s*\K[\d.]+' | head -1 || echo "0")
+                    [ -z "$SCORE" ] && SCORE="0"
+                    SCORE_INT=${SCORE%.*}
+                    
+                    cd - > /dev/null
+                    rm -rf "$TEMP_DIR"
+                    
+                    echo "  Score: $SCORE/25"
+                    
+                    # Update problem stats
+                    case $problem_num in
+                      1)
+                        ((P1_ATTEMPTS++))
+                        P1_TOTAL=$(echo "$P1_TOTAL + $SCORE" | bc)
+                        [ "$SCORE_INT" -eq 25 ] && ((P1_PASS++))
+                        ;;
+                      2)
+                        ((P2_ATTEMPTS++))
+                        P2_TOTAL=$(echo "$P2_TOTAL + $SCORE" | bc)
+                        [ "$SCORE_INT" -eq 25 ] && ((P2_PASS++))
+                        ;;
+                      3)
+                        ((P3_ATTEMPTS++))
+                        P3_TOTAL=$(echo "$P3_TOTAL + $SCORE" | bc)
+                        [ "$SCORE_INT" -eq 25 ] && ((P3_PASS++))
+                        ;;
+                      4)
+                        ((P4_ATTEMPTS++))
+                        P4_TOTAL=$(echo "$P4_TOTAL + $SCORE" | bc)
+                        [ "$SCORE_INT" -eq 25 ] && ((P4_PASS++))
+                        ;;
+                    esac
+                    
+                    ((TOTAL_SUBMISSIONS++))
+                    
+                    # Store in student array
+                    if [ -z "${STUDENTS[$STUDENT_NO]}" ]; then
+                      STUDENTS[$STUDENT_NO]="0,0,0,0"
+                      ((TOTAL_STUDENTS++))
+                    fi
+                    
+                    # Update student score for this problem
+                    IFS=',' read -ra SCORES <<< "${STUDENTS[$STUDENT_NO]}"
+                    SCORES[$((problem_num-1))]="$SCORE"
+                    STUDENTS[$STUDENT_NO]="${SCORES[0]},${SCORES[1]},${SCORES[2]},${SCORES[3]}"
+                  fi
+                fi
+              done
+            fi
+          done
+          
+          echo ""
+          echo "📈 Summary: $TOTAL_STUDENTS students, $TOTAL_SUBMISSIONS submissions"
+          
+          # Calculate averages
+          P1_AVG=0
+          P2_AVG=0
+          P3_AVG=0
+          P4_AVG=0
+          P1_PASS_RATE=0
+          P2_PASS_RATE=0
+          P3_PASS_RATE=0
+          P4_PASS_RATE=0
+          
+          [ "$P1_ATTEMPTS" -gt 0 ] && P1_AVG=$(echo "scale=2; $P1_TOTAL / $P1_ATTEMPTS" | bc) && P1_PASS_RATE=$(echo "scale=0; $P1_PASS * 100 / $P1_ATTEMPTS" | bc)
+          [ "$P2_ATTEMPTS" -gt 0 ] && P2_AVG=$(echo "scale=2; $P2_TOTAL / $P2_ATTEMPTS" | bc) && P2_PASS_RATE=$(echo "scale=0; $P2_PASS * 100 / $P2_ATTEMPTS" | bc)
+          [ "$P3_ATTEMPTS" -gt 0 ] && P3_AVG=$(echo "scale=2; $P3_TOTAL / $P3_ATTEMPTS" | bc) && P3_PASS_RATE=$(echo "scale=0; $P3_PASS * 100 / $P3_ATTEMPTS" | bc)
+          [ "$P4_ATTEMPTS" -gt 0 ] && P4_AVG=$(echo "scale=2; $P4_TOTAL / $P4_ATTEMPTS" | bc) && P4_PASS_RATE=$(echo "scale=0; $P4_PASS * 100 / $P4_ATTEMPTS" | bc)
+          
+          # Generate students JSON array
+          STUDENTS_JSON="["
+          FIRST=true
+          TOTAL_SCORE_SUM=0
+          
+          for STUDENT_NO in "${!STUDENTS[@]}"; do
+            IFS=',' read -ra SCORES <<< "${STUDENTS[$STUDENT_NO]}"
+            P1=${SCORES[0]:-0}
+            P2=${SCORES[1]:-0}
+            P3=${SCORES[2]:-0}
+            P4=${SCORES[3]:-0}
+            
+            # Calculate total
+            TOTAL=$(echo "$P1 + $P2 + $P3 + $P4" | bc)
+            TOTAL_INT=${TOTAL%.*}
+            
+            [ "$TOTAL_INT" -gt "$HIGHEST_SCORE" ] && HIGHEST_SCORE=$TOTAL_INT
+            TOTAL_SCORE_SUM=$(echo "$TOTAL_SCORE_SUM + $TOTAL" | bc)
+            
+            [ "$FIRST" = false ] && STUDENTS_JSON+=","
+            FIRST=false
+            
+            STUDENTS_JSON+="{\"studentNo\":\"$STUDENT_NO\",\"scores\":{\"problem1\":$P1,\"problem2\":$P2,\"problem3\":$P3,\"problem4\":$P4},\"total\":$TOTAL,\"lastSubmission\":\"$TIMESTAMP\"}"
+          done
+          
+          STUDENTS_JSON+="]"
+          
+          # Calculate average score
+          AVG_SCORE=0
+          [ "$TOTAL_STUDENTS" -gt 0 ] && AVG_SCORE=$(echo "scale=2; $TOTAL_SCORE_SUM / $TOTAL_STUDENTS" | bc)
+          
+          # Write JSON file
+          cat > "$SCORES_FILE" << EOF
+          {
+            "lastUpdated": "$TIMESTAMP",
+            "statistics": {
+              "totalStudents": $TOTAL_STUDENTS,
+              "totalSubmissions": $TOTAL_SUBMISSIONS,
+              "averageScore": $AVG_SCORE,
+              "highestScore": $HIGHEST_SCORE,
+              "problemStats": {
+                "problem1": { "attempts": $P1_ATTEMPTS, "avgScore": $P1_AVG, "passRate": $P1_PASS_RATE },
+                "problem2": { "attempts": $P2_ATTEMPTS, "avgScore": $P2_AVG, "passRate": $P2_PASS_RATE },
+                "problem3": { "attempts": $P3_ATTEMPTS, "avgScore": $P3_AVG, "passRate": $P3_PASS_RATE },
+                "problem4": { "attempts": $P4_ATTEMPTS, "avgScore": $P4_AVG, "passRate": $P4_PASS_RATE }
+              }
+            },
+            "students": $STUDENTS_JSON
+          }
+          EOF
+          
+          echo ""
+          echo "✅ Statistics generated:"
+          cat "$SCORES_FILE"
+
       - name: 🔧 Setup Pages
         uses: actions/configure-pages@v4
       
@@ -38,7 +225,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     
     runs-on: ubuntu-latest
-    needs: build
+    needs: build-stats
     
     steps:
       - name: 🚀 Deploy to GitHub Pages
