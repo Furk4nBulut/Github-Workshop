@@ -295,17 +295,195 @@ git diff abc123..def456
                         <a href="https://marklodato.github.io/visual-git-guide/index-en.html" target="_blank">📈 Visual
                             Git Guide →</a>
                     </div>
-                </div>
 
-                <h2 id="markdown">📝 Markdown</h2>
+                    <h2 id="gitignore">🙈 .gitignore Dosyası</h2>
 
-                <p>Markdown, README dosyaları ve dokümantasyon için kullanılan hafif bir işaretleme dilidir.</p>
+                    <p>.gitignore dosyası, Git'e hangi dosyaların takip edilmemesi gerektiğini söyler. Bu sayede
+                        gereksiz dosyalar repository'nize eklenmez.</p>
 
-                <h3>Temel Söz Dizimi</h3>
-                <div class="code-block">
-                    <div class="code-header"><span>Markdown</span><button class="copy-btn" onclick="copyCode(this)"><i
-                                class="far fa-copy"></i></button></div>
-                    <pre><code># Başlık 1
+                    <div class="callout callout-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div><strong>Neden Önemli?</strong> node_modules, .env dosyaları, IDE ayarları gibi dosyaları
+                            paylaşmamalısınız. Hem güvenlik hem de temizlik için!</div>
+                    </div>
+
+                    <h3>📝 Temel Kullanım</h3>
+                    <div class="code-block">
+                        <div class="code-header"><span>.gitignore</span><button class="copy-btn"
+                                onclick="copyCode(this)"><i class="far fa-copy"></i></button></div>
+                        <pre><code class="language-bash"># Yorum satırı
+
+# Tek dosya
+.env
+secrets.json
+
+# Klasör (sondaki / önemli!)
+node_modules/
+dist/
+build/
+.cache/
+
+# Uzantıya göre
+*.log
+*.tmp
+*.pyc
+
+# Pattern (glob)
+*.local
+.env.*
+
+# Hariç tutma (!) 
+!.env.example</code></pre>
+                    </div>
+
+                    <h3>🎯 Yaygın Pattern'ler</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Pattern</th>
+                                <th>Açıklama</th>
+                                <th>Örnek Eşleşme</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>*.log</code></td>
+                                <td>Tüm .log dosyaları</td>
+                                <td>error.log, debug.log</td>
+                            </tr>
+                            <tr>
+                                <td><code>build/</code></td>
+                                <td>build klasörü ve içeriği</td>
+                                <td>build/app.js</td>
+                            </tr>
+                            <tr>
+                                <td><code>**/temp</code></td>
+                                <td>Her yerdeki temp klasörü</td>
+                                <td>src/temp, lib/temp</td>
+                            </tr>
+                            <tr>
+                                <td><code>!important.log</code></td>
+                                <td>Hariç tut (ignore etme)</td>
+                                <td>important.log dahil edilir</td>
+                            </tr>
+                            <tr>
+                                <td><code>doc/*.txt</code></td>
+                                <td>doc/ içindeki txt dosyaları</td>
+                                <td>doc/readme.txt</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>💻 Dil/Framework Örnekleri</h3>
+                    <div class="code-block">
+                        <div class="code-header"><span>Node.js Projesi</span><button class="copy-btn"
+                                onclick="copyCode(this)"><i class="far fa-copy"></i></button></div>
+                        <pre><code class="language-bash"># Dependencies
+node_modules/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build
+dist/
+build/
+.next/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+npm-debug.log*
+yarn-debug.log*</code></pre>
+                    </div>
+
+                    <div class="code-block">
+                        <div class="code-header"><span>Python Projesi</span><button class="copy-btn"
+                                onclick="copyCode(this)"><i class="far fa-copy"></i></button></div>
+                        <pre><code class="language-bash"># Virtual environment
+venv/
+.venv/
+env/
+
+# Byte-compiled files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Distribution
+dist/
+build/
+*.egg-info/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Environment
+.env
+.env.local</code></pre>
+                    </div>
+
+                    <h3>🔧 Git Komutları</h3>
+                    <div class="code-block">
+                        <div class="code-header"><span>Terminal</span><button class="copy-btn"
+                                onclick="copyCode(this)"><i class="far fa-copy"></i></button></div>
+                        <pre><code class="language-bash"># .gitignore oluştur
+touch .gitignore
+
+# Zaten tracked dosyayı ignore etmek için
+git rm --cached dosya.txt
+git rm -r --cached klasor/
+
+# Ignore edilen dosyaları listele
+git status --ignored
+
+# Global gitignore ayarla (tüm projeler için)
+git config --global core.excludesfile ~/.gitignore_global</code></pre>
+                    </div>
+
+                    <div class="callout callout-success">
+                        <i class="fas fa-external-link-alt"></i>
+                        <div>
+                            <strong>🔗 Hazır Şablonlar:</strong><br>
+                            <a href="https://github.com/github/gitignore" target="_blank">📚 GitHub gitignore
+                                Koleksiyonu →</a><br>
+                            <a href="https://www.toptal.com/developers/gitignore" target="_blank">🛠️ gitignore.io
+                                Generator →</a><br>
+                            <a href="https://github.com/github/gitignore/blob/main/Node.gitignore" target="_blank">📦
+                                Node.js Şablonu →</a><br>
+                            <a href="https://github.com/github/gitignore/blob/main/Python.gitignore" target="_blank">🐍
+                                Python Şablonu →</a><br>
+                            <a href="https://github.com/github/gitignore/blob/main/Global/VisualStudioCode.gitignore"
+                                target="_blank">💻 VS Code Şablonu →</a>
+                        </div>
+                    </div>
+
+                    <div class="callout callout-info">
+                        <i class="fas fa-lightbulb"></i>
+                        <div>
+                            <strong>Pro İpucu:</strong> Yeni proje başlatırken GitHub'da repo oluştururken "Add
+                            .gitignore" seçeneğini kullanın. Dilinize göre otomatik şablon oluşturur!
+                        </div>
+                    </div>
+
+                    <h2 id="markdown">📝 Markdown</h2>
+
+                    <p>Markdown, README dosyaları ve dokümantasyon için kullanılan hafif bir işaretleme dilidir.</p>
+
+                    <h3>Temel Söz Dizimi</h3>
+                    <div class="code-block">
+                        <div class="code-header"><span>Markdown</span><button class="copy-btn"
+                                onclick="copyCode(this)"><i class="far fa-copy"></i></button></div>
+                        <pre><code># Başlık 1
 ## Başlık 2
 ### Başlık 3
 
@@ -333,58 +511,59 @@ console.log("Merhaba");
 | Tablo | Başlık |
 |-------|--------|
 | Veri  | Veri   |</code></pre>
-                </div>
-
-                <h2 id="licenses">📄 Lisanslar</h2>
-
-                <p>Projenizi paylaşırken bir lisans seçmek önemlidir:</p>
-
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Lisans</th>
-                            <th>Özellik</th>
-                            <th>Kullanım</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>MIT</strong></td>
-                            <td>En esnek</td>
-                            <td>Ticari kullanım, değiştirme, dağıtım serbest</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Apache 2.0</strong></td>
-                            <td>Patent koruması</td>
-                            <td>MIT gibi + patent hakları</td>
-                        </tr>
-                        <tr>
-                            <td><strong>GPL v3</strong></td>
-                            <td>Copyleft</td>
-                            <td>Türev çalışmalar da açık kaynak olmalı</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Unlicense</strong></td>
-                            <td>Public domain</td>
-                            <td>Hiçbir kısıtlama yok</td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <div class="callout callout-info">
-                    <i class="fas fa-lightbulb"></i>
-                    <div>
-                        <strong>Öneri:</strong> Emin değilseniz <strong>MIT</strong> lisansını seçin. En yaygın ve esnek
-                        lisanstır.
                     </div>
-                </div>
 
-                <div class="page-nav">
-                    <a href="module1.html" class="nav-prev"><i class="fas fa-arrow-left"></i><span>Modül 1:
-                            Giriş</span></a>
-                    <a href="module3.html" class="nav-next"><span>Modül 3: İş Akışı</span><i
-                            class="fas fa-arrow-right"></i></a>
-                </div>
+                    <h2 id="licenses">📄 Lisanslar</h2>
+
+                    <p>Projenizi paylaşırken bir lisans seçmek önemlidir:</p>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Lisans</th>
+                                <th>Özellik</th>
+                                <th>Kullanım</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>MIT</strong></td>
+                                <td>En esnek</td>
+                                <td>Ticari kullanım, değiştirme, dağıtım serbest</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Apache 2.0</strong></td>
+                                <td>Patent koruması</td>
+                                <td>MIT gibi + patent hakları</td>
+                            </tr>
+                            <tr>
+                                <td><strong>GPL v3</strong></td>
+                                <td>Copyleft</td>
+                                <td>Türev çalışmalar da açık kaynak olmalı</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Unlicense</strong></td>
+                                <td>Public domain</td>
+                                <td>Hiçbir kısıtlama yok</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="callout callout-info">
+                        <i class="fas fa-lightbulb"></i>
+                        <div>
+                            <strong>Öneri:</strong> Emin değilseniz <strong>MIT</strong> lisansını seçin. En yaygın ve
+                            esnek
+                            lisanstır.
+                        </div>
+                    </div>
+
+                    <div class="page-nav">
+                        <a href="module1.html" class="nav-prev"><i class="fas fa-arrow-left"></i><span>Modül 1:
+                                Giriş</span></a>
+                        <a href="module3.html" class="nav-next"><span>Modül 3: İş Akışı</span><i
+                                class="fas fa-arrow-right"></i></a>
+                    </div>
             </article>
 
             <footer class="footer">
