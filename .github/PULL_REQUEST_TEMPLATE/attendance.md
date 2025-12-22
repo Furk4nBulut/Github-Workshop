@@ -5,10 +5,17 @@ title: 'Yoklama: [Öğrenci No]'
 labels: yoklama
 ---
 
-## 📧 Öğrenci Bilgileri
+## 👤 Öğrenci Bilgileri
 
+**Ad Soyad:** `[Adınız Soyadınız]`
 **Öğrenci No:** `[Öğrenci Numaranız]`
 **E-posta:** `[Öğrenci No]@ogr.cbu.edu.tr`
+
+### 🌐 Sosyal Medya (İsteğe Bağlı)
+> Workshop sonrası iletişimde kalmak için profilinizi ekleyebilirsiniz!
+
+**LinkedIn:** `[https://www.linkedin.com/in/profiliniz/]`
+**GitHub:** `[https://github.com/KULLANICI_ADINIZ]`
 
 ---
 
