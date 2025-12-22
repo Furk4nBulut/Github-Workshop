@@ -1,43 +1,71 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace CSharpHomework
 {
     public class Problem4
     {
+        // YANLIŞ: Boş dizi kontrolü yok
         public static int DiziToplami(int[] dizi)
         {
             int toplam = 0;
-            foreach (int i in dizi)
-                toplam += i;
-            return toplam;
+            foreach (var sayi in dizi)
+            {
+                toplam += sayi;
+            }
+            return toplam; // Bu aslında doğru, ama diğerleri yanlış
         }
 
+        // YANLIŞ: Boş dizi için exception fırlatır
         public static double DiziOrtalamasi(int[] dizi)
         {
-            if (dizi.Length == 0) return 0;
-            return dizi.Average();
+            // HATA: dizi.Length == 0 kontrolü yok
+            int toplam = 0;
+            foreach (var sayi in dizi)
+            {
+                toplam += sayi;
+            }
+            return toplam / dizi.Length; // DivideByZero hatası verir
         }
 
+        // YANLIŞ: int.MinValue ile başlamıyor
         public static int EnBuyukBul(int[] dizi)
         {
-            return dizi.Max();
+            int max = 0; // HATA: int.MinValue olmalı
+            foreach (var sayi in dizi)
+            {
+                if (sayi > max) max = sayi;
+            }
+            return max; // Negatif dizilerde yanlış sonuç
         }
 
+        // YANLIŞ: int.MaxValue ile başlamıyor  
         public static int EnKucukBul(int[] dizi)
         {
-            return dizi.Min();
+            int min = 0; // HATA: int.MaxValue olmalı
+            foreach (var sayi in dizi)
+            {
+                if (sayi < min) min = sayi;
+            }
+            return min; // Pozitif dizilerde yanlış sonuç
         }
 
+        // YANLIŞ: Tek sayıları filtreliyor
         public static List<int> CiftSayilariFiltrele(int[] dizi)
         {
-            return dizi.Where(x => x % 2 == 0).ToList();
+            List<int> sonuc = new List<int>();
+            foreach (var sayi in dizi)
+            {
+                if (sayi % 2 != 0) // HATA: == 0 olmalı (çiftler için)
+                    sonuc.Add(sayi);
+            }
+            return sonuc;
         }
 
-        public static int SayiTekrarSay(int[] dizi, int sayi)
+        // YANLIŞ: Her zaman 0 döndürüyor
+        public static int SayiTekrarSay(int[] dizi, int aranan)
         {
-            return dizi.Count(x => x == sayi);
+            return 0; // HATA: Hiç saymıyor!
         }
     }
 }
