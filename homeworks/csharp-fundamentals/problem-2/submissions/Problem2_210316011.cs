@@ -4,51 +4,39 @@ namespace CSharpHomework
 {
     public class Problem2
     {
+        // YANLIŞ: Türkçe karakterler yok ve bazı günler eksik
         public static string GunAdiGetir(int gun)
         {
             switch (gun)
             {
                 case 1: return "Pazartesi";
-                case 2: return "Salı";
-                case 3: return "Çarşamba";
-                case 4: return "Perşembe";
-                case 5: return "Cuma";
-                case 6: return "Cumartesi";
-                case 7: return "Pazar";
-                default: return "Geçersiz gün";
+                case 2: return "Sali"; // HATA: "Salı" olmalı
+                case 3: return "Carsamba"; // HATA: "Çarşamba" olmalı
+                case 4: return "Persembe"; // HATA: "Perşembe" olmalı
+                default: return "Bilinmiyor"; // HATA: "Geçersiz gün" olmalı
             }
         }
 
+        // YANLIŞ: 400'e bölünme kuralı yok
         public static bool ArtikYilMi(int yil)
         {
-            if (yil % 400 == 0) return true;
-            if (yil % 100 == 0) return false;
-            return yil % 4 == 0;
+            return yil % 4 == 0; // HATA: 100 ve 400 kuralları eksik
         }
 
+        // YANLIŞ: Şubat için artık yıl kontrolü yok
         public static int AyinGunSayisi(int ay, int yil)
         {
-            if (ay < 1 || ay > 12) return 0;
-
-            switch (ay)
-            {
-                case 2:
-                    return ArtikYilMi(yil) ? 29 : 28;
-                case 4:
-                case 6:
-                case 9:
-                case 11:
-                    return 30;
-                default:
-                    return 31;
-            }
+            if (ay == 2) return 28; // HATA: Artık yıl kontrolü yok
+            if (ay == 4 || ay == 6 || ay == 9 || ay == 11) return 30;
+            return 31; // Geçersiz ay kontrolü yok
         }
 
+        // YANLIŞ: Yanlış döndürüyor
         public static string HaftaIciSonuMu(int gun)
         {
-            if (gun >= 1 && gun <= 5) return "Hafta İçi";
-            if (gun == 6 || gun == 7) return "Hafta Sonu";
-            return "Geçersiz gün";
+            if (gun >= 1 && gun <= 5)
+                return "Hafta ici"; // HATA: "Hafta İçi" olmalı (büyük İ)
+            return "Hafta sonu"; // HATA: "Hafta Sonu" olmalı
         }
     }
 }
