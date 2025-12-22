@@ -82,9 +82,19 @@ git push origin homework/OGRENCI_NO
 ### Adım 5: Pull Request Açın
 1. GitHub'da fork'unuza gidin
 2. "Compare & pull request" tıklayın
-3. PR başlığı: `Ödev: C# Çözümleri - OGRENCI_NO - AD SOYAD`
+3. **Önemli:** PR şablonu açılacak, formu doldurun
+4. PR başlığı: `Ödev: C# Çözümleri - OGRENCI_NO - AD SOYAD`
 
 > [!IMPORTANT]
+> PR açtığınızda **akademik dürüstlük beyanını** onaylamanız gerekiyor!
+> 
+> Beyan içeriği:
+> - ✅ Bu ödevi kendim yaptım, kopya çekmedim
+> - ✅ Kodlarımı test ettim ve çalıştığını onaylıyorum
+> - ✅ Dosya adı formatına uydum
+> - ✅ Başkasının dosyasını değiştirmedim
+
+> [!NOTE]
 > PR açtığınızda **GitHub Actions otomatik testler** çalışacak!  
 > Testler başarısız olursa PR birleştirilmez.
 
