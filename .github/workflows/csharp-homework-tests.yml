@@ -5,10 +5,20 @@ on:
     paths:
       - 'homeworks/csharp-fundamentals/**/submissions/**'
 
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  DOTNET_VERSION: '8.0.x'
+
 jobs:
   validate-and-test:
     runs-on: ubuntu-latest
     name: Validate & Test C# Submissions
+    outputs:
+      test-results: ${{ steps.run-tests.outputs.results }}
+      all-passed: ${{ steps.run-tests.outputs.all_passed }}
 
     steps:
       - name: Checkout
@@ -17,7 +27,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Find Changed Files
         id: changed-files
@@ -27,12 +37,14 @@ jobs:
             homeworks/csharp-fundamentals/**/submissions/*.cs
 
       - name: Validate File Names
+        id: validate-files
         if: steps.changed-files.outputs.any_changed == 'true'
         run: |
           echo "📋 Dosya Adı Kontrolü"
           echo "===================="
           
           VALID=true
+          INVALID_FILES=""
           
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
             filename=$(basename "$file")
@@ -42,6 +54,7 @@ jobs:
             if [[ ! $filename =~ ^Problem[1-4]_[0-9]{9}\.cs$ ]]; then
               echo "❌ HATA: $filename formatı yanlış!"
               echo "   Beklenen: ProblemX_OGRENCI_NO.cs (9 haneli numara)"
+              INVALID_FILES="${INVALID_FILES}${filename}\n"
               VALID=false
             else
               echo "✅ Format doğru: $filename"
@@ -51,131 +64,169 @@ jobs:
           if [ "$VALID" = false ]; then
             echo ""
             echo "⚠️ Bazı dosya adları yanlış formatta!"
+            echo "invalid_files<<EOF" >> $GITHUB_OUTPUT
+            echo -e "$INVALID_FILES" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+            echo "valid=false" >> $GITHUB_OUTPUT
             exit 1
           fi
           
           echo ""
           echo "✅ Tüm dosya adları doğru formatta!"
+          echo "valid=true" >> $GITHUB_OUTPUT
 
-      - name: Build and Test Problem 1
-        if: steps.changed-files.outputs.any_changed == 'true'
-        continue-on-error: true
+      - name: Run All Tests
+        id: run-tests
+        if: steps.changed-files.outputs.any_changed == 'true' && steps.validate-files.outputs.valid == 'true'
         run: |
-          echo "🧪 Problem 1 Testleri"
-          echo "===================="
+          echo "🧪 Testler Başlıyor"
+          echo "==================="
           
-          cd homeworks/csharp-fundamentals/problem-1
+          # Initialize results JSON
+          RESULTS='{"problems":[],"total_score":0,"max_score":100,"all_passed":true}'
+          ALL_PASSED=true
+          TOTAL_SCORE=0
           
-          for file in submissions/Problem1_*.cs; do
-            if [ -f "$file" ]; then
-              filename=$(basename "$file")
-              echo "Test ediliyor: $filename"
-              
-              # Create temp project
-              mkdir -p temp
-              cp "$file" temp/Problem1.cs
-              cp Problem1.Tests.cs temp/
-              
-              cd temp
-              dotnet new console -n TestProject -o . --force > /dev/null 2>&1
-              
-              # Run tests
-              dotnet run -- "$filename" || echo "❌ Test başarısız: $filename"
-              
-              cd ..
-              rm -rf temp
+          # Process each problem
+          for problem_num in 1 2 3 4; do
+            PROBLEM_DIR="homeworks/csharp-fundamentals/problem-${problem_num}"
+            
+            if [ -d "$PROBLEM_DIR/submissions" ]; then
+              for file in $PROBLEM_DIR/submissions/Problem${problem_num}_*.cs; do
+                if [ -f "$file" ]; then
+                  filename=$(basename "$file")
+                  student_no=$(echo "$filename" | grep -oP 'Problem[1-4]_\K\d{9}')
+                  
+                  echo ""
+                  echo "╔══════════════════════════════════════════════════╗"
+                  echo "║  Problem $problem_num - $filename"
+                  echo "╚══════════════════════════════════════════════════╝"
+                  
+                  # Create temp project
+                  TEMP_DIR=$(mktemp -d)
+                  cp "$file" "$TEMP_DIR/Problem${problem_num}.cs"
+                  cp "$PROBLEM_DIR/Problem${problem_num}.Tests.cs" "$TEMP_DIR/"
+                  
+                  cd "$TEMP_DIR"
+                  dotnet new console -n TestProject -o . --force > /dev/null 2>&1
+                  
+                  # Run tests and capture output
+                  TEST_OUTPUT=$(dotnet run -- "$filename" 2>&1) || true
+                  TEST_EXIT_CODE=$?
+                  
+                  echo "$TEST_OUTPUT"
+                  
+                  # Parse score from output
+                  SCORE=$(echo "$TEST_OUTPUT" | grep -oP 'TOPLAM PUAN\s*│\s*\K[\d.]+' || echo "0")
+                  
+                  if [ "$TEST_EXIT_CODE" -ne 0 ]; then
+                    ALL_PASSED=false
+                  fi
+                  
+                  TOTAL_SCORE=$(echo "$TOTAL_SCORE + $SCORE" | bc)
+                  
+                  cd - > /dev/null
+                  rm -rf "$TEMP_DIR"
+                fi
+              done
             fi
           done
-
-      - name: Build and Test Problem 2
-        if: steps.changed-files.outputs.any_changed == 'true'
-        continue-on-error: true
-        run: |
-          echo "🧪 Problem 2 Testleri"
-          echo "===================="
           
-          cd homeworks/csharp-fundamentals/problem-2
-          
-          for file in submissions/Problem2_*.cs; do
-            if [ -f "$file" ]; then
-              filename=$(basename "$file")
-              echo "Test ediliyor: $filename"
-              
-              mkdir -p temp
-              cp "$file" temp/Problem2.cs
-              cp Problem2.Tests.cs temp/
-              
-              cd temp
-              dotnet new console -n TestProject -o . --force > /dev/null 2>&1
-              dotnet run -- "$filename" || echo "❌ Test başarısız: $filename"
-              
-              cd ..
-              rm -rf temp
-            fi
-          done
-
-      - name: Build and Test Problem 3
-        if: steps.changed-files.outputs.any_changed == 'true'
-        continue-on-error: true
-        run: |
-          echo "🧪 Problem 3 Testleri"
-          echo "===================="
-          
-          cd homeworks/csharp-fundamentals/problem-3
-          
-          for file in submissions/Problem3_*.cs; do
-            if [ -f "$file" ]; then
-              filename=$(basename "$file")
-              echo "Test ediliyor: $filename"
-              
-              mkdir -p temp
-              cp "$file" temp/Problem3.cs
-              cp Problem3.Tests.cs temp/
-              
-              cd temp
-              dotnet new console -n TestProject -o . --force > /dev/null 2>&1
-              dotnet run -- "$filename" || echo "❌ Test başarısız: $filename"
-              
-              cd ..
-              rm -rf temp
-            fi
-          done
-
-      - name: Build and Test Problem 4
-        if: steps.changed-files.outputs.any_changed == 'true'
-        continue-on-error: true
-        run: |
-          echo "🧪 Problem 4 Testleri"
-          echo "===================="
-          
-          cd homeworks/csharp-fundamentals/problem-4
-          
-          for file in submissions/Problem4_*.cs; do
-            if [ -f "$file" ]; then
-              filename=$(basename "$file")
-              echo "Test ediliyor: $filename"
-              
-              mkdir -p temp
-              cp "$file" temp/Problem4.cs
-              cp Problem4.Tests.cs temp/
-              
-              cd temp
-              dotnet new console -n TestProject -o . --force > /dev/null 2>&1
-              dotnet run -- "$filename" || echo "❌ Test başarısız: $filename"
-              
-              cd ..
-              rm -rf temp
-            fi
-          done
-
-      - name: Summary
-        if: always()
-        run: |
           echo ""
-          echo "╔══════════════════════════════════════╗"
-          echo "║      C# ÖDEV TEST SONUÇLARI          ║"
-          echo "╚══════════════════════════════════════╝"
-          echo ""
-          echo "Test detayları için yukarıdaki logları inceleyin."
-          echo ""
-          echo "📚 Yardım için: https://github.com/Furk4nBulut/Github-Workshop/wiki"
+          echo "═══════════════════════════════════════════════════"
+          echo "📊 TOPLAM SONUÇ: $TOTAL_SCORE / 100 puan"
+          echo "═══════════════════════════════════════════════════"
+          
+          # Set outputs
+          echo "total_score=$TOTAL_SCORE" >> $GITHUB_OUTPUT
+          echo "all_passed=$ALL_PASSED" >> $GITHUB_OUTPUT
+          
+          # Exit with error if tests failed
+          if [ "$ALL_PASSED" = false ]; then
+            exit 1
+          fi
+
+      - name: Generate Job Summary
+        if: always() && steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          echo "## 📊 C# Ödev Test Sonuçları" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.validate-files.outputs.valid }}" = "false" ]; then
+            echo "### ❌ Dosya Adı Hatası" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Aşağıdaki dosyaların adları yanlış formatta:" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "${{ steps.validate-files.outputs.invalid_files }}" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Beklenen format:** \`ProblemX_OGRENCI_NO.cs\` (9 haneli numara)" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ steps.run-tests.outputs.all_passed }}" = "true" ]; then
+            echo "### ✅ Tüm Testler Başarılı!" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Toplam Puan:** ${{ steps.run-tests.outputs.total_score }} / 100" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "🎉 Tebrikler! PR merge edilebilir." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ⚠️ Bazı Testler Başarısız" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Toplam Puan:** ${{ steps.run-tests.outputs.total_score }} / 100" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Detaylı test çıktısı için yukarıdaki log'ları inceleyin." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "❌ **PR merge edilemez.** Tüm testlerin geçmesi gerekiyor." >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "📚 Yardım için: [GitHub Workshop Wiki](https://github.com/Furk4nBulut/Github-Workshop/wiki)" >> $GITHUB_STEP_SUMMARY
+
+      - name: Post PR Comment
+        if: always() && steps.changed-files.outputs.any_changed == 'true'
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ## 📊 C# Ödev Test Sonuçları
+            
+            ${{ steps.validate-files.outputs.valid == 'false' && '### ❌ Dosya Adı Hatası' || '' }}
+            ${{ steps.validate-files.outputs.valid == 'false' && format('Aşağıdaki dosyaların adları yanlış formatta:\n```\n{0}\n```\n\n**Beklenen format:** `ProblemX_OGRENCI_NO.cs` (9 haneli numara)', steps.validate-files.outputs.invalid_files) || '' }}
+            
+            ${{ steps.run-tests.outputs.all_passed == 'true' && '### ✅ Tüm Testler Başarılı!' || '' }}
+            ${{ steps.run-tests.outputs.all_passed == 'true' && format('**Toplam Puan:** {0} / 100\n\n🎉 Tebrikler! PR merge edilebilir.', steps.run-tests.outputs.total_score) || '' }}
+            
+            ${{ steps.run-tests.outputs.all_passed == 'false' && steps.validate-files.outputs.valid == 'true' && '### ⚠️ Bazı Testler Başarısız' || '' }}
+            ${{ steps.run-tests.outputs.all_passed == 'false' && steps.validate-files.outputs.valid == 'true' && format('**Toplam Puan:** {0} / 100\n\nDetaylı test çıktısı için [Actions loglarını]({1}) inceleyin.\n\n❌ **PR merge edilemez.** Tüm testlerin geçmesi gerekiyor.', steps.run-tests.outputs.total_score, format('https://github.com/{0}/actions/runs/{1}', github.repository, github.run_id)) || '' }}
+            
+            ---
+            
+            <details>
+            <summary>📋 Puanlama Sistemi</summary>
+            
+            | Problem | Konu | Max Puan |
+            |---------|------|----------|
+            | Problem 1 | Öğrenci Not Hesaplama (if-else) | 25 |
+            | Problem 2 | Gün ve Ay Hesaplama (switch-case) | 25 |
+            | Problem 3 | Döngüler ve Matematik | 25 |
+            | Problem 4 | Dizi ve Liste İşlemleri | 25 |
+            | **TOPLAM** | | **100** |
+            
+            </details>
+            
+            ---
+            📚 Yardım için: [GitHub Workshop Wiki](https://github.com/Furk4nBulut/Github-Workshop/wiki)
+
+      - name: Check Test Results
+        if: always() && steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          if [ "${{ steps.validate-files.outputs.valid }}" = "false" ]; then
+            echo "❌ Dosya adı formatı yanlış!"
+            exit 1
+          fi
+          
+          if [ "${{ steps.run-tests.outputs.all_passed }}" != "true" ]; then
+            echo "❌ Bazı testler başarısız!"
+            exit 1
+          fi
+          
+          echo "✅ Tüm kontroller başarılı!"
