@@ -89,6 +89,7 @@ const sidebarNavigation = [
         title: "",
         items: [
             { text: "Wiki Ana Sayfa", url: "wiki.html", icon: "fas fa-book" },
+            { text: "📊 İstatistikler", url: "stats.html", icon: "fas fa-chart-line" },
             { text: "← Tanıtım Sayfası", url: "index.html", icon: "fas fa-home" }
         ]
     },
