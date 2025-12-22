@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="GitHub Workshop - Öğrenci İstatistikleri ve Liderlik Tablosu">
+    <meta name="keywords" content="Git, GitHub, Workshop, İstatistik, Liderlik, Puan">
+    <meta name="author" content="Furkan Bulut">
+    <title>İstatistikler | GitHub Workshop</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="landing.css">
+    <link rel="stylesheet" href="stats.css">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <i class="fab fa-github"></i>
+                <span>GitHub Workshop</span>
+            </a>
+
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html" class="nav-link">Ana Sayfa</a></li>
+                <li><a href="wiki.html" class="nav-link">Wiki</a></li>
+                <li><a href="stats.html" class="nav-link nav-btn-outline active">İstatistikler</a></li>
+                <li><a href="https://github.com/Furk4nBulut/Github-Workshop" target="_blank" class="nav-link nav-btn">
+                        <i class="fab fa-github"></i> GitHub
+                    </a></li>
+            </ul>
+
+            <button id="themeToggle" class="nav-btn-icon" aria-label="Toggle Theme" style="margin-right: 15px;">
+                <i class="fas fa-moon"></i>
+            </button>
+
+            <button class="nav-toggle" id="navToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="stats-hero">
+        <div class="container">
+            <div class="stats-hero-content">
+                <div class="hero-badge">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Canlı İstatistikler</span>
+                </div>
+                <h1>Öğrenci <span class="gradient-text">Liderlik Tablosu</span></h1>
+                <p>C# ödev sonuçları ve sıralamaları</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Cards -->
+    <section class="stats-overview">
+        <div class="container">
+            <div class="stats-cards">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="totalStudents">0</span>
+                        <span class="stat-label">Toplam Öğrenci</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="totalSubmissions">0</span>
+                        <span class="stat-label">Toplam Teslim</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="averageScore">0</span>
+                        <span class="stat-label">Ortalama Puan</span>
+                    </div>
+                </div>
+                <div class="stat-card highlight">
+                    <div class="stat-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="highestScore">0</span>
+                        <span class="stat-label">En Yüksek Puan</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem Stats -->
+    <section class="problem-stats">
+        <div class="container">
+            <h2><i class="fas fa-tasks"></i> Problem Bazlı İstatistikler</h2>
+            <div class="problem-cards">
+                <div class="problem-card">
+                    <div class="problem-header">
+                        <span class="problem-number">1</span>
+                        <h3>Öğrenci Not Hesaplama</h3>
+                    </div>
+                    <div class="problem-stats-info">
+                        <div class="problem-stat">
+                            <span class="label">Teslim</span>
+                            <span class="value" id="p1-attempts">0</span>
+                        </div>
+                        <div class="problem-stat">
+                            <span class="label">Ort. Puan</span>
+                            <span class="value" id="p1-avg">0</span>
+                        </div>
+                        <div class="problem-stat">
+                            <span class="label">Geçme %</span>
+                            <span class="value" id="p1-pass">0%</span>
+                        </div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" id="p1-progress" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="problem-card">
+                    <div class="problem-header">
+                        <span class="problem-number">2</span>
+                        <h3>Gün ve Ay Hesaplama</h3>
+                    </div>
+                    <div class="problem-stats-info">
+                        <div class="problem-stat">
+                            <span class="label">Teslim</span>
+                            <span class="value" id="p2-attempts">0</span>
+                        </div>
+                        <div class="problem-stat">
+                            <span class="label">Ort. Puan</span>
+                            <span class="value" id="p2-avg">0</span>
+                        </div>
+                        <div class="problem-stat">
+                            <span class="label">Geçme %</span>
+                            <span class="value" id="p2-pass">0%</span>
+                        </div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" id="p2-progress" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="problem-card">
+                    <div class="problem-header">
+                        <span class="problem-number">3</span>
+                        <h3>Döngüler ve Matematik</h3>
+                    </div>
+                    <div class="problem-stats-info">
+                        <div class="problem-stat">
+                            <span class="label">Teslim</span>
+                            <span class="value" id="p3-attempts">0</span>
+                        </div>
+                        <div class="problem-stat">
+                            <span class="label">Ort. Puan</span>
+                            <span class="value" id="p3-avg">0</span>
+                        </div>
+                        <div class="problem-stat">
+                            <span class="label">Geçme %</span>
+                            <span class="value" id="p3-pass">0%</span>
+                        </div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" id="p3-progress" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="problem-card">
+                    <div class="problem-header">
+                        <span class="problem-number">4</span>
+                        <h3>Dizi ve Liste İşlemleri</h3>
+                    </div>
+                    <div class="problem-stats-info">
+                        <div class="problem-stat">
+                            <span class="label">Teslim</span>
+                            <span class="value" id="p4-attempts">0</span>
+                        </div>
+                        <div class="problem-stat">
+                            <span class="label">Ort. Puan</span>
+                            <span class="value" id="p4-avg">0</span>
+                        </div>
+                        <div class="problem-stat">
+                            <span class="label">Geçme %</span>
+                            <span class="value" id="p4-pass">0%</span>
+                        </div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" id="p4-progress" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Leaderboard Section -->
+    <section class="leaderboard-section">
+        <div class="container">
+            <div class="leaderboard-header">
+                <h2><i class="fas fa-trophy"></i> Liderlik Tablosu</h2>
+                <div class="leaderboard-controls">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchStudent" placeholder="Öğrenci No ile ara...">
+                    </div>
+                    <select id="sortSelect" class="sort-select">
+                        <option value="rank">Sıraya Göre</option>
+                        <option value="studentNo">Öğrenci No'ya Göre</option>
+                        <option value="recent">Son Güncelleme</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="leaderboard-container">
+                <table class="leaderboard-table" id="leaderboardTable">
+                    <thead>
+                        <tr>
+                            <th class="rank-col">#</th>
+                            <th>Öğrenci No</th>
+                            <th>P1</th>
+                            <th>P2</th>
+                            <th>P3</th>
+                            <th>P4</th>
+                            <th class="total-col">Toplam</th>
+                            <th>Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardBody">
+                        <!-- Dynamic content -->
+                    </tbody>
+                </table>
+                
+                <div class="empty-state" id="emptyState">
+                    <i class="fas fa-inbox"></i>
+                    <h3>Henüz veri yok</h3>
+                    <p>Öğrenci ödevleri teslim edildikçe burada görünecek.</p>
+                    <a href="https://github.com/Furk4nBulut/Github-Workshop/tree/main/homeworks" class="btn btn-primary" target="_blank">
+                        <i class="fas fa-book"></i> Ödevlere Git
+                    </a>
+                </div>
+            </div>
+
+            <div class="last-updated" id="lastUpdated">
+                <i class="fas fa-sync-alt"></i>
+                Son güncelleme: <span id="updateTime">-</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>Made with ❤️ by <a href="https://github.com/Furk4nBulut" target="_blank">Furkan Bulut</a></p>
+                <p>© 2025 GitHub Workshop | <a href="https://github.com/Furk4nBulut/Github-Workshop/blob/main/LICENSE"
+                        target="_blank">MIT License</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="landing.js"></script>
+    <script src="stats.js"></script>
+</body>
+
+</html>

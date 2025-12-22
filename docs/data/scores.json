@@ -1,0 +1,16 @@
+{
+  "lastUpdated": "2025-12-22T19:00:00Z",
+  "statistics": {
+    "totalStudents": 0,
+    "totalSubmissions": 0,
+    "averageScore": 0,
+    "highestScore": 0,
+    "problemStats": {
+      "problem1": { "attempts": 0, "avgScore": 0, "passRate": 0 },
+      "problem2": { "attempts": 0, "avgScore": 0, "passRate": 0 },
+      "problem3": { "attempts": 0, "avgScore": 0, "passRate": 0 },
+      "problem4": { "attempts": 0, "avgScore": 0, "passRate": 0 }
+    }
+  },
+  "students": []
+}
