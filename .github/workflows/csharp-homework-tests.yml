@@ -130,13 +130,24 @@ jobs:
               echo "║  Problem $problem_num - $filename"
               echo "╚══════════════════════════════════════════════════╝"
               
+              # Create temp directory and setup project
               TEMP_DIR=$(mktemp -d)
-              cp "$file" "$TEMP_DIR/Problem${problem_num}.cs"
-              cp "$PROBLEM_DIR/Problem${problem_num}.Tests.cs" "$TEMP_DIR/"
-              
               cd "$TEMP_DIR"
+              
+              # Create a new console project
               dotnet new console -n TestProject -o . --force > /dev/null 2>&1
               
+              # CRITICAL FIX: Remove auto-generated Program.cs
+              # (it contains "Hello, World!" and would be executed instead of tests)
+              rm -f Program.cs
+              
+              # Copy student submission (keeps original name for class reference)
+              cp "$GITHUB_WORKSPACE/$file" "./Problem${problem_num}.cs"
+              
+              # Copy test file AS Program.cs (it has Main method, becomes entry point)
+              cp "$GITHUB_WORKSPACE/$PROBLEM_DIR/Problem${problem_num}.Tests.cs" "./Program.cs"
+              
+              # Run tests
               set +e
               TEST_OUTPUT=$(dotnet run -- "$filename" 2>&1)
               TEST_EXIT_CODE=$?
@@ -144,7 +155,8 @@ jobs:
               
               echo "$TEST_OUTPUT"
               
-              SCORE=$(echo "$TEST_OUTPUT" | grep -oP 'TOPLAM PUAN\s*│\s*\K[\d.]+' | head -1 || echo "0")
+              # Extract score from output (format: "TOPLAM PUAN      │  25.00 / 25.00 puan")
+              SCORE=$(echo "$TEST_OUTPUT" | grep -oP 'TOPLAM PUAN\s*│\s*\K[0-9]+\.?[0-9]*' | head -1 || echo "0")
               [ -z "$SCORE" ] && SCORE="0"
               
               if [ "$TEST_EXIT_CODE" -eq 0 ]; then
