@@ -4,23 +4,17 @@ namespace CSharpHomework
 {
     public class Problem1
     {
-
         public static double HesaplaOrtalama(int vize, int final)
         {
-
-            double ortalama = (vize * 0.4) + (final * 0.6);
-            return ortalama;
+            return (vize * 0.4) + (final * 0.6);
         }
-
 
         public static string BelirleHarfNotu(double ortalama, int final)
         {
-
             if (final < 50)
             {
                 return "FF";
             }
-
 
             if (ortalama >= 90) return "AA";
             else if (ortalama >= 85) return "BA";
@@ -33,10 +27,8 @@ namespace CSharpHomework
             else return "FF";
         }
 
-
         public static string BelirleGecmeDurumu(string harfNotu)
         {
-
             switch (harfNotu)
             {
                 case "AA":
@@ -45,20 +37,15 @@ namespace CSharpHomework
                 case "CB":
                 case "CC":
                     return "Geçti";
-
                 case "DC":
                 case "DD":
                     return "Şartlı Geçti";
-
                 case "FD":
                 case "FF":
                     return "Kaldı";
-
                 default:
-                    return "Geçersiz Not";
+                    return "Geçersiz";
             }
         }
-
-
     }
 }
