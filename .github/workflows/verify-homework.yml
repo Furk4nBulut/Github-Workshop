@@ -63,27 +63,41 @@ jobs:
           
           VALID=true
           INVALID_FILES=""
-          VALID_FILES=""
+          VALID_FILES_ARRAY=()
           
           while IFS= read -r file; do
+            # Boş satırları atla
             [ -z "$file" ] && continue
+            
+            # .vs/ klasörü ve diğer meta dosyaları atla
+            if [[ "$file" == *"/.vs/"* ]] || [[ "$file" == *".json" ]] || [[ "$file" == *".db" ]] || [[ "$file" == *".sqlite" ]] || [[ "$file" == *".vsidx" ]] || [[ "$file" == *".wsuo" ]]; then
+              echo "⏭️ Atlanıyor (meta dosya): $file"
+              continue
+            fi
+            
             filename=$(basename "$file")
             echo "Kontrol ediliyor: $filename"
             
-            if [[ ! $filename =~ ^Problem[1-4]_[0-9]{9}\.cs$ ]]; then
+            if [[ ! $filename =~ ^Problem[1-4]_[0-9]+\.cs$ ]]; then
               echo "❌ HATA: $filename formatı yanlış!"
-              echo "   Beklenen: ProblemX_OGRENCI_NO.cs (9 haneli numara)"
+              echo "   Beklenen: ProblemX_OGRENCI_NO.cs (öğrenci numarası, hane sayısı sınırlaması yok)"
               INVALID_FILES="${INVALID_FILES}${filename}, "
               VALID=false
             else
               echo "✅ Format doğru: $filename"
-              VALID_FILES="${VALID_FILES}${file}\n"
+              VALID_FILES_ARRAY+=("$file")
             fi
           done <<< "${{ steps.changed-files.outputs.all_changed_files }}"
           
+          # Valid files listesini satır satır yaz (boş satır olmadan)
           echo "valid_files<<EOF" >> $GITHUB_OUTPUT
-          echo -e "$VALID_FILES" >> $GITHUB_OUTPUT
+          for f in "${VALID_FILES_ARRAY[@]}"; do
+            echo "$f" >> $GITHUB_OUTPUT
+          done
           echo "EOF" >> $GITHUB_OUTPUT
+          
+          # Geçerli dosya sayısını kaydet
+          echo "valid_count=${#VALID_FILES_ARRAY[@]}" >> $GITHUB_OUTPUT
           
           if [ "$VALID" = false ]; then
             echo ""
@@ -92,9 +106,13 @@ jobs:
             INVALID_FILES="${INVALID_FILES%, }"
             echo "invalid_files=$INVALID_FILES" >> $GITHUB_OUTPUT
             echo "valid=false" >> $GITHUB_OUTPUT
+          elif [ ${#VALID_FILES_ARRAY[@]} -eq 0 ]; then
+            echo ""
+            echo "ℹ️ Geçerli C# submission dosyası bulunamadı."
+            echo "valid=skip" >> $GITHUB_OUTPUT
           else
             echo ""
-            echo "✅ Tüm dosya adları doğru formatta!"
+            echo "✅ Tüm dosya adları doğru formatta! (${#VALID_FILES_ARRAY[@]} dosya)"
             echo "valid=true" >> $GITHUB_OUTPUT
           fi
 
@@ -267,7 +285,14 @@ jobs:
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "Yanlış format: ${{ steps.validate-files.outputs.invalid_files }}" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**Beklenen format:** ProblemX_OGRENCI_NO.cs (9 haneli numara)" >> $GITHUB_STEP_SUMMARY
+            echo "**Beklenen format:** ProblemX_OGRENCI_NO.cs (öğrenci numarası, hane sayısı sınırlaması yok)" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ steps.validate-files.outputs.valid }}" = "skip" ]; then
+            echo "### ℹ️ C# Submission Dosyası Bulunamadı" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Bu PR'da geçerli C# ödev dosyası tespit edilemedi." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Eğer ödev teslimi yapıyorsanız, dosyalarınızı şu formatta oluşturun:" >> $GITHUB_STEP_SUMMARY
+            echo "\`homeworks/csharp-fundamentals/problem-X/submissions/ProblemX_OGRENCI_NO.cs\`" >> $GITHUB_STEP_SUMMARY
           elif [ -f /tmp/comment_body.md ]; then
             cat /tmp/comment_body.md >> $GITHUB_STEP_SUMMARY
           fi
@@ -306,18 +331,18 @@ jobs:
               repo: context.repo.repo,
               body: `## ❌ Dosya Adı Hatası
 
-            Yanlış formatta dosyalar: **${invalidFiles}**
+              Yanlış formatta dosyalar: **${invalidFiles}**
 
-            ### 📋 Doğru Format
-            \`ProblemX_OGRENCI_NO.cs\` (9 haneli öğrenci numarası)
+              ### 📋 Doğru Format
+              \`ProblemX_OGRENCI_NO.cs\` (öğrenci numarası — hane sayısı sınırlaması yok)
 
-            **Örnek:** \`Problem1_210316011.cs\`
+              **Örnek:** \`Problem1_210316011.cs\`
 
-            ---
-            ❌ **PR merge edilemez.** Lütfen dosya adını düzeltin.
+              ---
+              ❌ **PR merge edilemez.** Lütfen dosya adını düzeltin.
 
-            ---
-            *GitHub Workshop Bot* 🤖`
+              ---
+              *GitHub Workshop Bot* 🤖`
             });
         env:
           INVALID_FILES: ${{ steps.validate-files.outputs.invalid_files }}
@@ -344,6 +369,11 @@ jobs:
           if [ "${{ steps.validate-files.outputs.valid }}" = "false" ]; then
             echo "❌ Dosya adı formatı yanlış!"
             exit 1
+          fi
+          
+          if [ "${{ steps.validate-files.outputs.valid }}" = "skip" ]; then
+            echo "ℹ️ Geçerli C# submission dosyası bulunamadı. PR kontrol edilmedi."
+            exit 0
           fi
           
           if [ "${{ steps.run-tests.outputs.all_passed }}" = "false" ]; then
