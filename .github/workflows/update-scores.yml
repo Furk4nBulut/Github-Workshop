@@ -55,7 +55,7 @@ jobs:
               const logContent = logs.data;
               
               // Extract student number and scores from logs
-              const studentMatch = logContent.match(/Problem[1-4]_(\d{9})\.cs/);
+              const studentMatch = logContent.match(/Problem[1-4]_(\d+)\.cs/);
               const scoreMatch = logContent.match(/TOPLAM SONUÇ:\s*(\d+(?:\.\d+)?)\s*\/\s*100/);
               
               const p1Match = logContent.match(/Problem 1\s+(\d+(?:\.\d+)?)\/25/);
