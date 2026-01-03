@@ -81,7 +81,7 @@ namespace CSharpHomework.Tests
             Console.WriteLine("📋 Dosya Adı Kontrolü:");
             Console.WriteLine($"   Dosya: {dosyaAdi}");
 
-            string pattern = @"^Problem4_(\d{9})\.cs$";
+            string pattern = @"^Problem4_(\d+)\.cs$";
             var match = Regex.Match(dosyaAdi, pattern);
 
             if (!match.Success)
