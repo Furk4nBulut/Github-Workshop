@@ -1,10 +1,10 @@
 {
-  "lastUpdated": "2025-12-23T07:25:48Z",
+  "lastUpdated": "2026-01-03T20:45:04Z",
   "statistics": {
-    "totalStudents": 2,
-    "totalSubmissions": 2,
-    "averageScore": 41.73,
-    "highestScore": 48.73,
+    "totalStudents": 9,
+    "totalSubmissions": 7,
+    "averageScore": 64.8288888888889,
+    "highestScore": 100,
     "problemStats": {
       "problem1": {
         "attempts": 0,
@@ -50,6 +50,83 @@
       },
       "total": 34.73,
       "lastSubmission": "2025-12-23T07:25:48Z"
+    },
+    {
+      "studentNo": "251613036",
+      "scores": {
+        "problem1": 0,
+        "problem2": 0,
+        "problem3": 0,
+        "problem4": 0
+      },
+      "total": 100,
+      "lastSubmission": "2025-12-27T14:27:33Z"
+    },
+    {
+      "studentNo": "2516013014",
+      "scores": {
+        "problem1": 0,
+        "problem2": 0,
+        "problem3": 0,
+        "problem4": 0
+      },
+      "total": 100,
+      "lastSubmission": "2026-01-03T18:57:00Z"
+    },
+    {
+      "studentNo": "2516013037",
+      "scores": {
+        "problem1": 0,
+        "problem2": 0,
+        "problem3": 0,
+        "problem4": 0
+      },
+      "total": 100,
+      "lastSubmission": "2026-01-03T16:37:44Z"
+    },
+    {
+      "studentNo": "2516013044",
+      "scores": {
+        "problem1": 0,
+        "problem2": 0,
+        "problem3": 0,
+        "problem4": 0
+      },
+      "total": 100,
+      "lastSubmission": "2026-01-03T18:14:11Z"
+    },
+    {
+      "studentNo": "251613044",
+      "scores": {
+        "problem1": 0,
+        "problem2": 0,
+        "problem3": 0,
+        "problem4": 0
+      },
+      "total": 0,
+      "lastSubmission": "2026-01-03T18:03:11Z"
+    },
+    {
+      "studentNo": "2516013019",
+      "scores": {
+        "problem1": 0,
+        "problem2": 0,
+        "problem3": 0,
+        "problem4": 0
+      },
+      "total": 100,
+      "lastSubmission": "2026-01-03T20:45:04Z"
+    },
+    {
+      "studentNo": "2516013048",
+      "scores": {
+        "problem1": 0,
+        "problem2": 0,
+        "problem3": 0,
+        "problem4": 0
+      },
+      "total": 0,
+      "lastSubmission": "2026-01-03T20:41:47Z"
     }
   ]
 }
