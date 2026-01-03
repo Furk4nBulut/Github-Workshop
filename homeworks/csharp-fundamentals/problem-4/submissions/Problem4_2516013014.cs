@@ -5,19 +5,7 @@ namespace CSharpHomework
 {
     public class Problem4
     {
-        public static void Main(string[] args)
-        {
-            int[] sayilar = { 5, 12, 7, 3, 9, 14, 6, 8, 10, 2, 7 };
-
-            Console.WriteLine(DiziToplami(sayilar));
-            Console.WriteLine(DiziOrtalamasi(sayilar));
-            Console.WriteLine(EnBuyukBul(sayilar));
-            Console.WriteLine(EnKucukBul(sayilar));
-            Console.WriteLine(string.Join(", ", CiftSayilariFiltrele(sayilar)));
-            Console.WriteLine(SayiTekrarSay(sayilar, 7));
-            Console.ReadLine();
-        }
-
+        
         public static int DiziToplami(int[] dizi)
         {
             int toplam = 0;

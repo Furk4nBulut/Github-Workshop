@@ -5,16 +5,7 @@ namespace CSharpHomework
 {
     public class Problem3
     {
-        public static void Main(string[] args)
-        {
-            // Test etmek istersen burayı kullanabilirsin
-            Console.WriteLine(Faktoriyel(5));
-            Console.WriteLine(string.Join(", ", FibonacciSerisi(5)));
-            Console.WriteLine(BasamakSayisi(12345));
-            Console.WriteLine(AsalMi(17));
-            Console.WriteLine(SayilarinToplami(10));
-            Console.ReadLine();
-        }
+        
 
         public static long Faktoriyel(int n)
         {

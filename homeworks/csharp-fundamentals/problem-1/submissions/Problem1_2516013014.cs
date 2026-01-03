@@ -5,25 +5,7 @@ namespace CSharpHomework
     public class Problem1
     {
 
-        public static void Main(string[] args)
-        {
-            Console.Write("Vize Notunu Giriniz: ");
-            int vize = Convert.ToInt32(Console.ReadLine());
-
-            Console.Write("Final Notunu Giriniz: ");
-            int final = Convert.ToInt32(Console.ReadLine());
-
-            double ortalama = HesaplaOrtalama(vize, final);
-            string harfNotu = BelirleHarfNotu(ortalama, final);
-            string gecmeDurumu = BelirleGecmeDurumu(harfNotu);
-
-            Console.WriteLine($"Ortalama: {ortalama}");
-            Console.WriteLine($"Harf Notu: {harfNotu}");
-            Console.WriteLine($"Geçme Durumu: {gecmeDurumu}");
-
-
-            Console.ReadLine();
-        }
+       
 
 
         public static double HesaplaOrtalama(int vize, int final)

@@ -4,14 +4,7 @@ namespace CSharpHomework
 {
     public class Problem2
     {
-        public static void Main(string[] args)
-        {
-            Console.WriteLine(GunAdiGetir(1));
-            Console.WriteLine(ArtikYilMi(2024));
-            Console.WriteLine(AyinGunSayisi(2, 2024));
-            Console.WriteLine(HaftaIciSonuMu(6));
-            Console.ReadLine();
-        }
+       
 
         public static string GunAdiGetir(int gunNumarasi)
         {
