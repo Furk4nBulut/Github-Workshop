@@ -62,4 +62,5 @@ namespace CSharpHomework
             return (gunNumarasi == 6 || gunNumarasi == 7) ? "Hafta Sonu" : "Hafta İçi";
         }
     }
+
 }
