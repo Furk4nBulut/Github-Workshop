@@ -1,0 +1,336 @@
+----SORU1:----
+static double OrtalamaHesapla(int vize, int final)
+{
+    return vize * 0.4 + final * 0.6;
+}
+static string HarfNotuBelirle(double ortalama, int final)
+{
+    if (final < 50)
+        return "FF";
+
+    if (ortalama >= 90 && ortalama <= 100)
+        return "AA";
+    else if (ortalama >= 85)
+        return "BA";
+    else if (ortalama >= 80)
+        return "BB";
+    else if (ortalama >= 75)
+        return "CB";
+    else if (ortalama >= 70)
+        return "CC";
+    else if (ortalama >= 65)
+        return "DC";
+    else if (ortalama >= 60)
+        return "DD";
+    else if (ortalama >= 50)
+        return "FD";
+    else
+        return "FF";
+}
+static string GecmeDurumu(string harfNotu)
+{
+    if (harfNotu == "AA" || harfNotu == "BA" || harfNotu == "BB" ||
+        harfNotu == "CB" || harfNotu == "CC")
+        return "Geçti";
+    else if (harfNotu == "DC" || harfNotu == "DD")
+        return "Şartlı Geçti";
+    else
+        return "Kaldı";
+}
+ static void Main(string[] args)
+    {
+        Console.Write("Vize notunu giriniz: ");
+        int vize = Convert.ToInt32(Console.ReadLine());
+
+        Console.Write("Final notunu giriniz: ");
+        int final = Convert.ToInt32(Console.ReadLine());
+
+        double ortalama = OrtalamaHesapla(vize, final);
+        string harfNotu = HarfNotuBelirle(ortalama, final);
+        string durum = GecmeDurumu(harfNotu);
+
+        Console.WriteLine("Ortalama: " + ortalama);
+        Console.WriteLine("Harf Notu: " + harfNotu);
+        Console.WriteLine("Durum: " + durum);
+
+        Console.ReadKey();
+    }
+
+
+
+-----SORU2:-----
+ static void Main(string[] args)
+    {
+        // 1. Gün Adı
+        Console.Write("Gün numarasını giriniz (1-7): ");
+        int gun = Convert.ToInt32(Console.ReadLine());
+        Console.WriteLine("Gün Adı: " + GunAdiGetir(gun));
+
+        // 2. Artık Yıl
+        Console.Write("\nYıl giriniz: ");
+        int yil = Convert.ToInt32(Console.ReadLine());
+        Console.WriteLine("Artık Yıl mı?: " + ArtikYilMi(yil));
+
+        // 3. Ayın Gün Sayısı
+        Console.Write("\nAy numarasını giriniz (1-12): ");
+        int ay = Convert.ToInt32(Console.ReadLine());
+        Console.WriteLine("Ayın Gün Sayısı: " + AyinGunSayisi(ay, yil));
+
+        // 4. Hafta İçi / Sonu
+        Console.WriteLine("\nGünün Türü: " + HaftaIciSonuMu(gun));
+
+        Console.ReadKey();
+    }
+
+    // Gün Adı Metodu
+    public static string GunAdiGetir(int gunNumarasi)
+    {
+        switch (gunNumarasi)
+        {
+            case 1: return "Pazartesi";
+            case 2: return "Salı";
+            case 3: return "Çarşamba";
+            case 4: return "Perşembe";
+            case 5: return "Cuma";
+            case 6: return "Cumartesi";
+            case 7: return "Pazar";
+            default: return "Geçersiz gün";
+        }
+    }
+
+    //  Artık Yıl Metodu
+    public static bool ArtikYilMi(int yil)
+    {
+        if (yil % 400 == 0)
+            return true;
+        else if (yil % 100 == 0)
+            return false;
+        else if (yil % 4 == 0)
+            return true;
+        else
+            return false;
+    }
+
+    //  Ayın Gün Sayısı Metodu
+    public static int AyinGunSayisi(int ay, int yil)
+    {
+        switch (ay)
+        {
+            case 1:
+            case 3:
+            case 5:
+            case 7:
+            case 8:
+            case 10:
+            case 12:
+                return 31;
+
+            case 4:
+            case 6:
+            case 9:
+            case 11:
+                return 30;
+
+            case 2:
+                return ArtikYilMi(yil) ? 29 : 28;
+
+            default:
+                return 0;
+        }
+    }
+
+    //  Hafta İçi / Sonu Metodu
+    public static string HaftaIciSonuMu(int gunNumarasi)
+    {
+        return (gunNumarasi >= 1 && gunNumarasi <= 5)
+            ? "Hafta İçi"
+            : (gunNumarasi == 6 || gunNumarasi == 7)
+                ? "Hafta Sonu"
+                : "Geçersiz gün";
+    }
+}
+
+
+
+
+------SORU3:-------
+ public class Problem3
+    {
+        //  Faktoriyel Metodu (for döngüsü)
+        public static long Faktoriyel(int n)
+        {
+            long sonuc = 1;
+
+            for (int i = 1; i <= n; i++)
+            {
+                sonuc *= i;
+            }
+
+            return sonuc;
+        }
+
+        //  Fibonacci Serisi Metodu (while döngüsü)
+        public static List<int> FibonacciSerisi(int adet)
+        {
+            List<int> fib = new List<int>();
+
+            if (adet <= 0)
+                return fib;
+
+            int a = 0, b = 1;
+            int sayac = 0;
+
+            while (sayac < adet)
+            {
+                fib.Add(a);
+                int gecici = a + b;
+                a = b;
+                b = gecici;
+                sayac++;
+            }
+
+            return fib;
+        }
+
+        //  Basamak Sayısı Metodu (do-while döngüsü)
+        public static int BasamakSayisi(int sayi)
+        {
+            sayi = Math.Abs(sayi);
+            int basamak = 0;
+
+            do
+            {
+                basamak++;
+                sayi /= 10;
+            }
+            while (sayi > 0);
+
+            return basamak;
+        }
+
+        //  Asal Mi Metodu (for döngüsü)
+        public static bool AsalMi(int sayi)
+        {
+            if (sayi <= 1)
+                return false;
+
+            for (int i = 2; i <= Math.Sqrt(sayi); i++)
+            {
+                if (sayi % i == 0)
+                    return false;
+            }
+
+            return true;
+        }
+
+        //  Sayıların Toplamı Metodu (for döngüsü)
+        public static int SayilarinToplami(int n)
+        {
+            int toplam = 0;
+
+            for (int i = 1; i <= n; i++)
+            {
+                toplam += i;
+            }
+
+            return toplam;
+        }
+    }
+}
+
+-----SORU4:----
+
+using System;
+using System.Collections.Generic;
+
+namespace CSharpHomework
+{
+    public class Problem4
+    {
+        //  Dizi Toplamı (foreach)
+        public static int DiziToplami(int[] dizi)
+        {
+            int toplam = 0;
+
+            foreach (int eleman in dizi)
+            {
+                toplam += eleman;
+            }
+
+            return toplam;
+        }
+
+        //  Dizi Ortalaması
+        public static double DiziOrtalamasi(int[] dizi)
+        {
+            if (dizi.Length == 0)
+                return 0;
+
+            int toplam = 0;
+
+            foreach (int eleman in dizi)
+            {
+                toplam += eleman;
+            }
+
+            return (double)toplam / dizi.Length;
+        }
+
+        //  En Büyük Elemanı Bul (foreach)
+        public static int EnBuyukBul(int[] dizi)
+        {
+            int enBuyuk = dizi[0];
+
+            foreach (int eleman in dizi)
+            {
+                if (eleman > enBuyuk)
+                    enBuyuk = eleman;
+            }
+
+            return enBuyuk;
+        }
+
+        //  En Küçük Elemanı Bul (foreach)
+        public static int EnKucukBul(int[] dizi)
+        {
+            int enKucuk = dizi[0];
+
+            foreach (int eleman in dizi)
+            {
+                if (eleman < enKucuk)
+                    enKucuk = eleman;
+            }
+
+            return enKucuk;
+        }
+
+        // Çift Sayıları Filtrele (foreach + if)
+        public static List<int> CiftSayilariFiltrele(int[] dizi)
+        {
+            List<int> ciftler = new List<int>();
+
+            foreach (int eleman in dizi)
+            {
+                if (eleman % 2 == 0)
+                    ciftler.Add(eleman);
+            }
+
+            return ciftler;
+        }
+
+        //  Sayı Tekrar Say (foreach)
+        public static int SayiTekrarSay(int[] dizi, int aranan)
+        {
+            int sayac = 0;
+
+            foreach (int eleman in dizi)
+            {
+                if (eleman == aranan)
+                    sayac++;
+            }
+
+            return sayac;
+        }
+    }
+}
+
